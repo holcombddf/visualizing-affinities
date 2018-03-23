@@ -38,7 +38,7 @@ allele_csv= "./Nworld.csv"
 #	5 - ASountheast Asian
 # 
 #	This variable must still be a list even for one population. ex. 'columns=[6]' Will produce a chart identical to the world only population percentages. 
-columns=[6,0,1,2,3,4,5]
+columns=[6]
 
 #'output_folder_path':
 #    Either '-1', or the path to the directory where all outputs will be stored (the directory will be created if it does not already exist)
