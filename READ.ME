@@ -8,9 +8,6 @@ Please cite :
 Pandey GS, Yanover C, Howard TE, Sauna ZE (2013) Polymorphisms in theF8 Gene and MHC-II Variants as Risk Factors for the Development of Inhibitory
 Anti-Factor VIII Antibodies during the Treatment of Hemophilia A: A Computational Assessment. PLoS Comput Biol 9(5): e1003066. doi:10.1371/journal.pcbi.1003066
 
-
-
-
 This script will enable the creation of heatmaps and percentages of risk populations
 
 Instructions for Use.
@@ -41,23 +38,25 @@ Instructions for Use.
 
 	b) affinity_viz.py - using the parameters.py file and importing the class Affinity_Visualization, this script will
 						 create an instance of Affinity_Visualization and create the heatmaps and promiscuity plots.
+						 
+	c) automate_affinity_viz.py - separates fasta files into component sequences, creating multiple fasta files, then runs 								affinity_viz.py on all of them (not necessary, just easier to run)
 
-	c) parameters.py - contains all the information for this particular run including file locations and titles.
+	d) parameters.py - contains all the information for this particular run including file locations and titles.
 					   This is the only file that should need to be changed for a standard running of these scripts.
 
-	d) Nworld.csv - This file is not necessary but a file matching the format is and must be referenced in the parameters.py file as allele_csv
+	e) Nworld.csv - This file is not necessary but a file matching the format is and must be referenced in the parameters.py file as allele_csv
 	
-	e) World.txt - This file is not necessary but a file matching the format is and must be referenced in the parameters.py file as HLA_file_path
+	f) World.txt - This file is not necessary but a file matching the format is and must be referenced in the parameters.py file as HLA_file_path
     
 		Both of these files were made using numbers from https://bethematch.org
 		Another Option is to parse files from www.allelefrequencies.net
 
-        f) A fasta file for the sequence of interest. This file should be in UTF-8 format. occassional errors have occured with both \r and \n 
+        g) A fasta file for the sequence of interest. This file should be in UTF-8 format. occassional errors have occured with both \r and \n 
 
 3) Running Affinity_visualization
 	
-	Assuming all of those files exist in the same folder, the program can simply be run witht he command 'python affinity_viz.py ./parameters.py'
+	Assuming all of those files exist in the same folder, the program can simply be run with the command 'python automate_affinity_viz.py --path [path] --fasta [fasta file]', where path is a path to the directory containing the relevant files, and [fasta file] is the name of the fasta file to produce an affinity visualization for.
 
-	The parameters.py file will allow some basic changes and allow for differeing file locations.
+	The parameters.py file will allow some basic changes and allow for differing file locations.
 
 4) Questions regarding this script to tranform netMHCIIpan results into graphics should be sent to joseph.mcgill@fda.hhs.gov or zuben.sauna@fda.hhs.gov
