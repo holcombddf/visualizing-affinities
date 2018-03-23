@@ -45,7 +45,7 @@ def main(sysargv=[]):
     My_Affinity_Visualization.get_promiscuity_plots()
     #print "Promiscuity plots have been generated and saved"
     
-    #My_Affinity_Visualization.get_overlay_plots()
+    My_Affinity_Visualization.get_overlay_plots()
     #print "Overlay plots have been generated and saved"
     
     print sysargv[1]+" is all done!"

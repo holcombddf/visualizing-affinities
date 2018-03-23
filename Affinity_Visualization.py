@@ -413,56 +413,107 @@ class Affinity_Visualization:
      
      # Generate and save the len(self.cutoffs) many overlay plots 
     def get_overlay_plots(self):
-      
-	total_freq = np.sum(self.allele_freq_matrix, axis=0)
+	total_freq = np.sum(self.allele_freq_series)
 	for this_cutoff in self.cutoffs:
 	    # Get y-values for promiscuity plot, and mask the elipses
             binary_mat = self.image_mat <= this_cutoff
-            #freq_matrix_array = self.allele_freq_series.dot(binary_mat)
-            freq_matrix_array = np.transpose(np.array(self.allele_freq_matrix)).dot(binary_mat)
-            #freq_matrix_array = np.divide(total_freq,np.array(freq_matrix_array)) # / total_freq
-            freq_matrix_array = 100 * freq_matrix_array / total_freq[:, np.newaxis]
 
-            plt.plot(freq_matrix_array)
-            freq_matrix_array=np.transpose(freq_matrix_array)
-            
+            #freq_array = self.allele_freq_series.dot(binary_mat)
+            freq_array = np.array(self.allele_freq_series).dot(binary_mat)
+            freq_array = 100 * np.array(freq_array) / total_freq
+
+            ###################################################
+            # Preliminary code for locating sequence segments #
+            # above a certain cutoff and counting             # 
+            # the number of peaks on the promiscuity plot     #
+            ###################################################
+            prom_cut_list = []
+            prom_ind_list = []
+            peaks_above_cutoff = []
+
+            promiscuity_cutoff = 60
+            num_peaks = 0
+            for i in range(0,len(freq_array)-1):
+                if freq_array[i-1]<freq_array[i] and freq_array[i+1]<=freq_array[i]:
+                    num_peaks+=1
+            for i in range(0,len(freq_array)):
+                if freq_array[i]>promiscuity_cutoff:
+                    prom_ind_list.append(i)
+                    prom_cut_list.append(freq_array[i])
+            #print prom_ind_list
+            #print prom_cut_list
+
+            seq_above_value=""
+
+            for i in range(0, len(prom_ind_list)-1): 
+                if prom_ind_list[i+1]-prom_ind_list[i]==1:
+                    seq_above_value+=str(self.seq_df["Sequence"][0][prom_ind_list[i]]) 
+                else: 
+                    seq_above_value+=' ' + str(self.seq_df["Sequence"][0][prom_ind_list[i]]) 
+            #print seq_above_value
+
+            #############
+            # Ends Here #
+            #############
+
+            masked_freq_array = np.ma.masked_array(freq_array, self.image_mat.columns=='...')
+	  
             # Make the heatmap
-            fig, ax_heat = plt.subplots()
-            this_heatmap = ax_heat.pcolor(self.image_mat, cmap=plt.cm.hot, vmin=0, vmax=int(1.1*this_cutoff))
+            fig, ax1 = plt.subplots()
+            #fig = plt.figure()
+            #ax = fig.add_subplot(222)
+            this_heatmap = ax1.pcolor(self.image_mat, cmap=plt.cm.hot, vmin=0, vmax=1.1*this_cutoff)
+            #this_heatmap = ax.pcolor(self.image_mat.iloc[:,1:], cmap=plt.cm.hot, vmin=0, vmax=1.1*this_cutoff)
+
             
             # Construct colorbar legend
-            if self.perc_rank==0:
-                these_ticks = range(0, int(1.1*this_cutoff), int(this_cutoff/5)+1 )
-                cbar = fig.colorbar(this_heatmap, ticks=these_ticks, orientation='vertical', pad=0.05)#KK:pad controls hm-colorbar distance
-                cbar.ax.set_yticklabels([str(this_tick)+'nM' for this_tick in these_ticks])
-            else:
-                these_ticks = range(0, int(this_cutoff+1), int(this_cutoff/5)+1)
-                cbar = fig.colorbar(this_heatmap, ticks=these_ticks, orientation='vertical', pad=0.05)#KK:pad controls hm-colorbar distance
-                cbar.ax.set_yticklabels([str(this_tick)+'%' for this_tick in these_ticks])
-                
+            #these_ticks = range(0, int(1.1*this_cutoff), int(this_cutoff/5))
+            #cbar = fig.colorbar(this_heatmap, ticks=these_ticks, orientation='vertical', pad=0.05)#KK:pad controls hm-colorbar distance
+            #cbar.ax.set_yticklabels([str(this_tick)+'nM' for this_tick in these_ticks])
+            #cbar.ax.set_yticklabels([str(this_tick)+'%' for this_tick in these_ticks])
+            
             # remove the unnecessary extra space at the edges
             plt.xlim(0, self.image_mat.shape[1])
             plt.ylim(0, self.image_mat.shape[0])
-            
-            # Make the plot
-            ax_prom = ax_heat.twinx()
-            ax_prom.plot(freq_matrix_array, lw=1.5)
-            
-            ax_prom.set_ylabel("Promiscuity score")
+            plt.ylabel('Heatmap', size=18)
             
             # put the major ticks at the middle of each cell
-            ax_heat.set_xticks(np.arange(self.image_mat.shape[1]) + 0.5, minor=False)
-            ax_heat.set_yticks(np.arange(self.image_mat.shape[0]) + 0.5, minor=False)
-            ax_heat.invert_yaxis()
-            ax_heat.xaxis.tick_top()
+            ax1.set_xticks(np.arange(self.image_mat.shape[1]) + 0.5, minor=False)
+            ax1.set_yticks(np.arange(self.image_mat.shape[0]) + 0.5, minor=False)
+            ax1.invert_yaxis()
+            ax1.xaxis.tick_top()
             
             # tick labels
-            ax_heat.set_xticklabels(self.image_mat.columns, minor=False) # JA: testing quick fix
-            ax_heat.set_yticklabels([self.allele_numbering[num] for num in self.image_mat.index], minor=False, size=11) # JA: testing quick fix
+            #ax.set_xticklabels(self.image_mat.columns[1:], minor=False)
+            ax1.set_xticklabels(self.image_mat.columns, minor=False) # JA: testing quick fix
+            #ax.set_yticklabels(self.image_mat.index, minor=False, size=11)#KK:Added size argument
+            #ax.set_yticklabels(self.image_mat["Allele"], minor=False, size=11)
+            ax1.set_yticklabels([self.allele_numbering[num] for num in self.image_mat.index], minor=False, size=11) # JA: testing quick fix
+            #ax.set_yticklabels(map(lambda x: x[-5:], self.image_mat.index), minor=False)
             
             # hide tick marks
-            for t in ax_heat.xaxis.get_ticklines(): t.set_visible(False) 
-            for t in ax_heat.yaxis.get_ticklines(): t.set_visible(False) 
+            for t in ax1.xaxis.get_ticklines(): t.set_visible(False) 
+            for t in ax1.yaxis.get_ticklines(): t.set_visible(False) 
+            
+            ax2 = ax1.twinx()
+            ax2.plot(masked_freq_array, lw=3)
+            
+            # Scale and label the axes
+            plt.xlim(0, len(freq_array))
+            plt.ylim(0, 100)
+            plt.ylabel('Promiscuity Score', size=18)
+
+            # Place the tick marks as needed
+            ax2.set_xticks(np.arange(self.image_mat.shape[1]), minor=False)
+            ax2.set_yticks(range(0,110,10), minor=False)
+            
+            # tick labels
+            ax2.set_xticklabels(self.image_mat.columns, minor=False)
+            #print self.image_mat.columns
+            ax2.set_yticklabels(map(str,range(0,110,10)), minor=False, size=20)
+            
+            # hide tick marks on x-axis
+            for t in ax2.xaxis.get_ticklines(): t.set_visible(False) 
             
             # Add a line dividing each of the segmented chunks (between the two ellipses)
             split_inds = np.where(self.image_mat.columns == '...')[0]
@@ -475,16 +526,21 @@ class Affinity_Visualization:
             if self.mutation_inds != -1:
                 if type(self.mutation_inds) == list:
                     for tick_ind in self._transform_mut_inds():
-                        ax_heat.get_xticklabels()[tick_ind].set_color('red')
+                        ax1.get_xticklabels()[tick_ind].set_color('red')
                 elif type(self.mutation_inds) == dict:
                     for color,tick_ind in self._transform_mut_inds_dict():
-                        ax_heat.get_xticklabels()[tick_ind].set_color(color)
-                        
+                        ax1.get_xticklabels()[tick_ind].set_color(color)
+            
             # Generate the plot's title
-            plt.suptitle(self.my_title, fontsize=16)
+            #plt.suptitle(self.my_title+' Heatmap ('+str(this_cutoff)+'nM cutoff)', fontsize=18)
+            #plt.suptitle(self.my_title, fontsize=16)
             
             # Size and save the plot; we want the plot dimensions 
             # to be roughly proportional to self.image_mat, with .25 inches per row, and .20 inches per column
+            #fig.set_size_inches(self.image_mat.shape[1]*.20, self.image_mat.shape[0]*.25)
+            #fig.set_size_inches(self.image_mat.shape[1]*.20 + 1.5, self.image_mat.shape[0]*.25)
+            #pdb.set_trace()
+            #fig.set_size_inches(self.image_mat.shape[1]*.20 + 2.5, self.image_mat.shape[0]*.25 + 1.5)
             my_dpi = 150
             if (self.image_mat.shape[1]*.20 + 5.5)*my_dpi > 32000: # official limit of 32768 pixels, computed as width*dpi
                 fig.set_size_inches(32000/my_dpi, self.image_mat.shape[0]*.25 + 1.5) # cap the image size
@@ -492,9 +548,6 @@ class Affinity_Visualization:
                 fig.set_size_inches(self.image_mat.shape[1]*.20 + 5.5, self.image_mat.shape[0]*.25 + 1.5)
 
             # Save and close the plot
-            fig.set_tight_layout({'rect': (0, 0, 1, 0.95)})
-            if self.perc_rank==0:
-                fig.savefig(self.output_folder+'/'+self.output_prefix+'_Overlay_Plot_'+str(this_cutoff)+'nM.png', dpi=my_dpi)
-            if self.perc_rank==1:
-                fig.savefig(self.output_folder+'/'+self.output_prefix+'_Overlay_Plot_'+str(this_cutoff)+'%.png', dpi=my_dpi)
+            #fig.set_tight_layout(True)#KK: added the tight_layout - remove if not needed
+            fig.savefig(self.output_folder+'/'+self.output_prefix+'_Overlay_'+str(this_cutoff)+'nM.png', dpi=my_dpi)
             plt.close()
