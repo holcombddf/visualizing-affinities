@@ -211,7 +211,7 @@ class Affinity_Visualization:
             else:
                 mat_list.append(blank_mat)
                 mat_list.append(this_mat)    
-        self.image_mat = pd.concat(mat_list, axis=1)    
+        self.image_mat = pd.concat(mat_list, axis=1)
         self.image_mat.to_csv(self.output_folder+'/'+self.output_prefix+'_reshaped_affinity_df.csv')
 
     def get_allele_numbering(self):
@@ -474,7 +474,7 @@ class Affinity_Visualization:
             
             # remove the unnecessary extra space at the edges
             plt.xlim(0, self.image_mat.shape[1])
-            plt.ylim(0, self.image_mat.shape[0])
+            #plt.ylim(0, self.image_mat.shape[0])
             plt.ylabel('Heatmap', size=18)
             
             # put the major ticks at the middle of each cell
