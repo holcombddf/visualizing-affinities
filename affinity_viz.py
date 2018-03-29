@@ -5,11 +5,11 @@ import argparse
 def test_args(sysargv, ind): #returns true unless sysargv[ind] is false
     flag = True
     try: 
-      flag = eval_str(sysargv[ind])
+      flag = eval_str_t(sysargv[ind])
     finally:
       return flag
 
-def eval_str(string): #defaults to true if it doesn't find false
+def eval_str_t(string): #defaults to true if it doesn't find false
     string = (string.strip()).lower()
     if string == "false" or string == "0" or string == "f":
       return False
